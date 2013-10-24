@@ -27,7 +27,7 @@ Then add to the configuration (`/etc/chef/solo.rb` for chef-solo or `/etc/chef/c
 require "chef/handler/zookeeper"
 
 # Create the handler
-zookeeper_handler = Chef::Handler::Zookeeper.new
+zookeeper_handler = Chef::Handler::ZookeeperHandler.new
 
 # Some Zookeeper configurations
 zookeeper_handler.server "zookeeper.mydomain.com"
@@ -54,7 +54,7 @@ argument_array = [
 chef_gem "chef-handler-zookeeper"
 
 # Then activate the handler with the `chef_handler` LWRP
-chef_handler "Chef::Handler::Zookeeper" do
+chef_handler "Chef::Handler::ZookeeperHandler" do
   source "#{Gem::Specification.find_by_name("chef-handler-zookeeper").lib_dirs_glob}/chef/handler/zookeeper"
   arguments argument_array
   supports :start => true, :report => true, :exception => true
@@ -86,7 +86,7 @@ zookeeper_handler_path = Gem::Specification.respond_to?("find_by_name") ?
   Gem.all_load_paths.grep(/chef-handler-zookeeper/).first
 
 # Then activate the handler with the `chef_handler` LWRP
-chef_handler "Chef::Handler::Zookeeper" do
+chef_handler "Chef::Handler::ZookeeperHandler" do
   source "#{zookeeper_handler_path}/chef/handler/zookeeper"
   arguments argument_array
   supports :start => true, :report => true, :exception => true
@@ -120,7 +120,7 @@ argument_array = [
   :znode => "/chef/somepath/chef_status",
   :end_template => "/tmp/chef_handler_zookeeper_body.erb",
 ]
-chef_handler "Chef::Handler::Zookeeper" do
+chef_handler "Chef::Handler::ZookeeperHandler" do
   # [...]
   arguments argument_array
 end

@@ -3,7 +3,7 @@
   "chef_version" => Chef::VERSION,
   "ohai_version" => Ohai::VERSION,
   "environment" => node.chef_environment,
-  "start_time" => start_time.to_s,
+  "start_time" => run_status.kind_of?(Chef::RunStatus) ? start_time.to_s : Time.now.to_s,
   "status" => "running",
 }.to_json
 %>

@@ -23,7 +23,7 @@ require 'erubis'
 
 class Chef
   class Handler
-    class Zookeeper < ::Chef::Handler
+    class ZookeeperHandler < ::Chef::Handler
       include ::Chef::Handler::Zookeeper::Config
   
       def initialize(config={})
@@ -32,9 +32,11 @@ class Chef
       end
   
       def report
-        if elapsed_time.nil?
+        if !run_status.kind_of?(Chef::RunStatus) or elapsed_time.nil?
+          Chef::Log.info("#{self.class.to_s} START")
           znode_set(start_template || "#{File.dirname(__FILE__)}/zookeeper/templates/start.json.erb")
         else
+          Chef::Log.info("#{self.class.to_s} END")
           znode_set(end_template || "#{File.dirname(__FILE__)}/zookeeper/templates/end.json.erb")
         end
       end
