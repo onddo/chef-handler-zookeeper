@@ -191,7 +191,7 @@ Stacktrace:
 <% end -%>
 ```
 
-The following variables are accesible inside the template:
+The following variables are accessible inside the template:
 
 * `start_time` - The time the chef run started.
 * `end_time` - The time the chef run ended.
