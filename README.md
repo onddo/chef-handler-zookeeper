@@ -57,7 +57,7 @@ chef_gem "chef-handler-zookeeper"
 chef_handler "Chef::Handler::ZookeeperHandler" do
   source "#{Gem::Specification.find_by_name("chef-handler-zookeeper").lib_dirs_glob}/chef/handler/zookeeper"
   arguments argument_array
-  supports :start => true, :report => true, :exception => true
+  supports :report => true, :exception => true
   action :enable
 end
 ```
@@ -89,9 +89,27 @@ zookeeper_handler_path = Gem::Specification.respond_to?("find_by_name") ?
 chef_handler "Chef::Handler::ZookeeperHandler" do
   source "#{zookeeper_handler_path}/chef/handler/zookeeper"
   arguments argument_array
-  supports :start => true, :report => true, :exception => true
+  supports :report => true, :exception => true
   action :enable
 end
+```
+
+#### start_handler
+
+If you want to run also as a *start handler* using `chef_handler` cookbook, you can add this code **below the chef_handler LWRP call**:
+
+```ruby
+# based on code from chef-sensu-handler cookbook: https://github.com/needle-cookbooks/chef-sensu-handler/blob/master/recipes/default.rb
+ruby_block 'trigger_start_handlers' do
+  block do
+    require 'chef/run_status'
+    require 'chef/handler'
+
+    # a bit tricky, required by the default start.json.erb template to have access to node
+    Chef::Handler.run_start_handlers(self)
+  end
+  action :nothing
+end.run_action(:create)
 ```
 
 ## Handler Configuration Options
