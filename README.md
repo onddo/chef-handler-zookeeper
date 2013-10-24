@@ -44,6 +44,10 @@ report_handlers << zookeeper_handler
 Use the [chef_handler LWRP](http://community.opscode.com/cookbooks/chef_handler), creating a recipe with the following:
 
 ```ruby
+# A compiler is required for the `zk` gem
+node.default['build_essential']['compiletime'] = true
+include_recipe 'build-essential'
+
 # Handler configuration options
 argument_array = [
   :server => "zookeeper.mydomain.com:2181",
@@ -65,6 +69,10 @@ end
 If you have an old version of gem package (< 1.8.6) without `find_by_name` or old chef-client (< 0.10.10) without `chef_gem`, you can try creating a recipe similar to the following:
 
 ```ruby
+# A compiler is required for the `zk` gem
+node.default['build_essential']['compiletime'] = true
+include_recipe 'build-essential'
+
 # Handler configuration options
 argument_array = [
   :server => "zookeeper.mydomain.com:2181",
@@ -96,9 +104,17 @@ end
 
 #### start_handler
 
-If you want to run also as a *start handler* using `chef_handler` cookbook, you can add this code **below the chef_handler LWRP call**:
+If you want to run also as a *start handler* using `chef_handler` cookbook, you can use a recipe similar to the following:
 
 ```ruby
+# [...]
+
+# We will need to install chef handler at compile time
+chef_handler "Chef::Handler::ZookeeperHandler" do
+# [...]
+  action :nothing
+end.run_action(:enable)
+
 # based on code from chef-sensu-handler cookbook: https://github.com/needle-cookbooks/chef-sensu-handler/blob/master/recipes/default.rb
 ruby_block 'trigger_start_handlers' do
   block do
