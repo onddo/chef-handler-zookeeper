@@ -109,7 +109,7 @@ If you want to run also as a *start handler* using `chef_handler` cookbook, you 
 ```ruby
 # [...]
 
-# We will need to install chef handler at compile time
+# We will need to install the chef handler at compile time
 chef_handler "Chef::Handler::ZookeeperHandler" do
 # [...]
   action :nothing
@@ -206,6 +206,8 @@ The following variables are accesible inside the template:
 * `failed?` - Did the chef run fail? True if the chef run raised an uncaught exception.
 
 Default templates are in the [templates](https://github.com/onddo/chef-handler-zookeeper/tree/master/lib/chef/handler/zookeeper/templates) directory.
+
+**Note:** When using `start_template` with the **chef_handler cookbook**, only the `node` variable will be accesible from the template.
 
 ## Running the tests
 
