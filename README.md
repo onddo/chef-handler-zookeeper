@@ -218,7 +218,7 @@ Minitest tests can be run as usual:
 # TODO
 
 * Support for znode creation:
-  * Including *:acls* and *:recursive*.
+  * Including *:create* boolean, *:acl* for the ACL and *:recursive*.
 * Add digest authentication support.
 * Add tests.
 
