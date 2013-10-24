@@ -1,0 +1,9 @@
+<%= require 'json'
+{
+  "chef_version" => Chef::VERSION,
+  "ohai_version" => Ohai::VERSION,
+  "environment" => node.chef_environment,
+  "start_time" => start_time.to_s,
+  "status" => "running",
+}.to_json
+%>

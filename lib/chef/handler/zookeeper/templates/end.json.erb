@@ -1,0 +1,20 @@
+<%= require 'json'
+data = {
+  "chef_version" => Chef::VERSION,
+  "ohai_version" => Ohai::VERSION,
+  "run_list" => node.run_list.to_s,
+  "environment" => node.chef_environment,
+  "start_time" => start_time.to_s,
+  "end_time" => start_time.to_s,
+  "elapsed_time" => elapsed_time.to_s,
+  "updated_resources" => updated_resources.count,
+  "status" => success? ? "success" : "failure",
+}
+
+if exception
+  data['exception'] = run_status.formatted_exception
+  data['backtrace'] = Array(backtrace).join("\n")
+end
+
+data
+%>
