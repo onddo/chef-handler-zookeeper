@@ -16,5 +16,5 @@ if exception
   data['backtrace'] = Array(backtrace).join("\n")
 end
 
-data
+data.to_json
 %>
