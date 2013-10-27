@@ -31,6 +31,14 @@ class Chef::Handler::FakeZookeeperHandler < Chef::Handler::ZookeeperHandler
 
 end
 
+def run_status_new
+  @run_status = if Gem.loaded_specs['chef'].version > Gem::Version.new('0.12.0')
+    Chef::RunStatus.new(@node, {})
+  else
+    Chef::RunStatus.new(@node)
+  end
+end
+
 describe Chef::Handler::ZookeeperHandler do
   before do
     @config = {
@@ -46,11 +54,7 @@ describe Chef::Handler::ZookeeperHandler do
     @node.name('test')
     Chef::Handler::ZookeeperHandler.any_instance.stubs(:node).returns(@node)
 
-    @run_status = if Gem.loaded_specs['chef'].version > Gem::Version.new('0.12.0')
-      Chef::RunStatus.new(@node, {})
-    else
-      Chef::RunStatus.new(@node)
-    end
+    @run_status = run_status_new
     @run_status.start_clock
     @run_status.stop_clock
   end
@@ -85,6 +89,31 @@ describe Chef::Handler::ZookeeperHandler do
 
     assert_equal fake_zookeeper.zk_client_new, true
   end
+
+  describe '#report' do
+    before do
+      @zookeeper_handler = Chef::Handler::ZookeeperHandler.new(@config)
+      @run_status = run_status_new
+    end
+
+    it 'should use the start_template when the run is not over' do
+      @run_status.start_clock
+      @zookeeper_handler.stubs(:start_template_body).once
+      @zookeeper_handler.stubs(:end_template_body).never
+
+      @zookeeper_handler.run_report_unsafe(@run_status)
+    end
+
+    it 'should use the start_template when the run is over' do
+      @run_status.start_clock
+      @run_status.stop_clock
+      @zookeeper_handler.stubs(:end_template_body).once
+      @zookeeper_handler.stubs(:start_template_body).never
+
+      @zookeeper_handler.run_report_unsafe(@run_status)
+    end
+
+  end # describe #report
 
   it 'should be able to generate the default end_template' do
     @fake_zookeeper_handler = Chef::Handler::FakeZookeeperHandler.new(@config)
