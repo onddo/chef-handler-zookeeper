@@ -7,7 +7,7 @@ data = {
   "start_time" => start_time.to_s,
   "end_time" => end_time.to_s,
   "elapsed_time" => elapsed_time.to_s,
-  "updated_resources" => updated_resources.count,
+  "updated_resources" => updated_resources.kind_of?(Array) ? updated_resources.count : 0,
   "status" => success? ? "success" : "failure",
 }
 
