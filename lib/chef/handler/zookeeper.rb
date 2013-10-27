@@ -25,19 +25,17 @@ class Chef
   class Handler
     class ZookeeperHandler < ::Chef::Handler
       include ::Chef::Handler::ZookeeperHandler::Config
-  
+
       def initialize(config={})
         Chef::Log.debug("#{self.class.to_s} initialized.")
         config_init(config)
       end
-  
+
       def report
         if !run_status.kind_of?(Chef::RunStatus) or elapsed_time.nil?
-          Chef::Log.info("#{self.class.to_s} START")
-          znode_set(start_template || "#{File.dirname(__FILE__)}/zookeeper/templates/start.json.erb")
+          zk.set(znode, start_template_body)
         else
-          Chef::Log.info("#{self.class.to_s} END")
-          znode_set(end_template || "#{File.dirname(__FILE__)}/zookeeper/templates/end.json.erb")
+          zk.set(znode, end_template_body)
         end
       end
 
@@ -49,19 +47,23 @@ class Chef
           ZK.new(server)
         end
       end
-  
+
+      def start_template_body
+        znode_body(start_template || "#{File.dirname(__FILE__)}/zookeeper/templates/start.json.erb")
+      end
+
+      def end_template_body
+        znode_body(end_template || "#{File.dirname(__FILE__)}/zookeeper/templates/end.json.erb")
+      end
+
       def znode_body(body_template)
+        config_check
         template = IO.read(body_template)
         context = self
         eruby = Erubis::Eruby.new(template)
         eruby.evaluate(context)
       end
 
-      def znode_set(body_template)
-        config_check
-        zk.set(znode, znode_body(body_template))
-      end
-  
     end
   end
 end
