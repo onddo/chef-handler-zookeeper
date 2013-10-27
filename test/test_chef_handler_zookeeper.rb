@@ -179,6 +179,15 @@ describe Chef::Handler::ZookeeperHandler do
 
     end # describe when chef run is over
 
+    describe 'when called without run_status (chef_handler LWRP)' do
+      it 'should use the start_template when the run is not over' do
+        @zookeeper_handler.stubs(:start_template_body).once
+        @zookeeper_handler.stubs(:end_template_body).never
+
+        @zookeeper_handler.run_report_unsafe(Object.new)
+      end
+    end
+
   end # describe #report
 
 end
