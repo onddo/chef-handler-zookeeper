@@ -24,7 +24,7 @@ require 'erubis'
 class Chef
   class Handler
     class ZookeeperHandler < ::Chef::Handler
-      include ::Chef::Handler::Zookeeper::Config
+      include ::Chef::Handler::ZookeeperHandler::Config
   
       def initialize(config={})
         Chef::Log.debug("#{self.class.to_s} initialized.")
