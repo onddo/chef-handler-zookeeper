@@ -96,50 +96,89 @@ describe Chef::Handler::ZookeeperHandler do
       @run_status = run_status_new
     end
 
-    it 'should use the start_template when the run is not over' do
-      @run_status.start_clock
-      @zookeeper_handler.stubs(:start_template_body).once
-      @zookeeper_handler.stubs(:end_template_body).never
+    describe 'when chef run is not over' do
+      before do
+        @run_status.start_clock
+      end
 
-      @zookeeper_handler.run_report_unsafe(@run_status)
-    end
+      it 'should use the start_template when the run is not over' do
+        @zookeeper_handler.stubs(:start_template_body).once
+        @zookeeper_handler.stubs(:end_template_body).never
 
-    it 'should use the start_template when the run is over' do
-      @run_status.start_clock
-      @run_status.stop_clock
-      @zookeeper_handler.stubs(:end_template_body).once
-      @zookeeper_handler.stubs(:start_template_body).never
+        @zookeeper_handler.run_report_unsafe(@run_status)
+      end
 
-      @zookeeper_handler.run_report_unsafe(@run_status)
-    end
+      it 'should be able to generate the default start_template' do
+        @fake_zookeeper_handler = Chef::Handler::FakeZookeeperHandler.new(@config)
+        Chef::Handler::FakeZookeeperHandler.any_instance.stubs(:node).returns(@node)
+        @fake_zookeeper_handler.run_report_unsafe(@run_status)
+
+        @fake_zookeeper_handler.get_zookeeper_start_template_body.must_match Regexp.new('"start_time":')
+      end
+
+      it 'should throw an exception when the start_template file does not exist' do
+        @config[:start_template] = '/tmp/nonexistent-template.erb'
+        @zookeeper_handler = Chef::Handler::ZookeeperHandler.new(@config)
+
+        assert_raises(Chef::Exceptions::ValidationFailed) { @zookeeper_handler.run_report_unsafe(@run_status) }
+      end
+
+      it 'should be able to generate the start_template when configured as an option' do
+        body_msg = 'My Template'
+        @config[:start_template] = '/tmp/existing-template.erb'
+        ::File.stubs(:exists?).with(@config[:start_template]).returns(true)
+        IO.stubs(:read).with(@config[:start_template]).returns(body_msg)
+        @fake_zookeeper_handler = Chef::Handler::FakeZookeeperHandler.new(@config)
+        Chef::Handler::FakeZookeeperHandler.any_instance.stubs(:node).returns(@node)
+        @fake_zookeeper_handler.run_report_unsafe(@run_status)
+
+        assert_equal @fake_zookeeper_handler.get_zookeeper_start_template_body, body_msg
+      end
+
+    end # describe when chef run is not over
+
+    describe 'when chef run is over' do
+      before do
+        @run_status.start_clock
+        @run_status.stop_clock
+      end
+
+      it 'should use the end_template when the run is over' do
+        @zookeeper_handler.stubs(:end_template_body).once
+        @zookeeper_handler.stubs(:start_template_body).never
+
+        @zookeeper_handler.run_report_unsafe(@run_status)
+      end
+
+      it 'should be able to generate the default end_template' do
+        @fake_zookeeper_handler = Chef::Handler::FakeZookeeperHandler.new(@config)
+        Chef::Handler::FakeZookeeperHandler.any_instance.stubs(:node).returns(@node)
+        @fake_zookeeper_handler.run_report_unsafe(@run_status)
+
+        @fake_zookeeper_handler.get_zookeeper_end_template_body.must_match Regexp.new('"end_time":')
+      end
+
+      it 'should throw an exception when the end_template file does not exist' do
+        @config[:end_template] = '/tmp/nonexistent-template.erb'
+        @zookeeper_handler = Chef::Handler::ZookeeperHandler.new(@config)
+
+        assert_raises(Chef::Exceptions::ValidationFailed) { @zookeeper_handler.run_report_unsafe(@run_status) }
+      end
+
+      it 'should be able to generate the end_template when configured as an option' do
+        body_msg = 'My Template'
+        @config[:end_template] = '/tmp/existing-template.erb'
+        ::File.stubs(:exists?).with(@config[:end_template]).returns(true)
+        IO.stubs(:read).with(@config[:end_template]).returns(body_msg)
+        @fake_zookeeper_handler = Chef::Handler::FakeZookeeperHandler.new(@config)
+        Chef::Handler::FakeZookeeperHandler.any_instance.stubs(:node).returns(@node)
+        @fake_zookeeper_handler.run_report_unsafe(@run_status)
+
+        assert_equal @fake_zookeeper_handler.get_zookeeper_end_template_body, body_msg
+      end
+
+    end # describe when chef run is over
 
   end # describe #report
-
-  it 'should be able to generate the default end_template' do
-    @fake_zookeeper_handler = Chef::Handler::FakeZookeeperHandler.new(@config)
-    Chef::Handler::FakeZookeeperHandler.any_instance.stubs(:node).returns(@node)
-    @fake_zookeeper_handler.run_report_unsafe(@run_status)
-
-    @fake_zookeeper_handler.get_zookeeper_end_template_body.must_match Regexp.new('"start_time":')
-  end
-
-  it 'should throw an exception when the end_template file does not exist' do
-    @config[:end_template] = '/tmp/nonexistent-template.erb'
-    @zookeeper_handler = Chef::Handler::ZookeeperHandler.new(@config)
-
-    assert_raises(Chef::Exceptions::ValidationFailed) { @zookeeper_handler.run_report_unsafe(@run_status) }
-  end
-
-  it 'should be able to generate the end_template when configured as an option' do
-    body_msg = 'My Template'
-    @config[:end_template] = '/tmp/existing-template.erb'
-    ::File.stubs(:exists?).with(@config[:end_template]).returns(true)
-    IO.stubs(:read).with(@config[:end_template]).returns(body_msg)
-    @fake_zookeeper_handler = Chef::Handler::FakeZookeeperHandler.new(@config)
-    Chef::Handler::FakeZookeeperHandler.any_instance.stubs(:node).returns(@node)
-    @fake_zookeeper_handler.run_report_unsafe(@run_status)
-
-    assert_equal @fake_zookeeper_handler.get_zookeeper_end_template_body, body_msg
-  end
 
 end
