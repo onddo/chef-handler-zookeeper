@@ -5,7 +5,7 @@ chef_version = ENV.key?('CHEF_VERSION') ? "#{ENV['CHEF_VERSION']}" : ['>= 0.9.0'
 Gem::Specification.new do |s|
   s.name = 'chef-handler-zookeeper'
   s.version = ::Chef::Handler::ZookeeperHandler::VERSION
-  s.date = '2013-10-24'
+  s.date = '2013-10-28'
   s.platform = Gem::Platform::RUBY
   s.summary = 'Send Chef reports to Zookeeper'
   s.description = 'Chef report handler to send notifications to Zookeeper about Chef runs.'
