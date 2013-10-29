@@ -6,6 +6,8 @@ This Chef Handler is heavily based on [Chef Handler SNS](https://github.com/ondd
 
 * http://wiki.opscode.com/display/chef/Exception+and+Report+Handlers
 
+[![Build Status](https://travis-ci.org/onddo/chef-handler-zookeeper.png)](https://travis-ci.org/onddo/chef-handler-zookeeper)
+
 ## Requirements
 
 * A Zookeeper server.
