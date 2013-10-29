@@ -10,6 +10,7 @@ This Chef Handler is heavily based on [Chef Handler SNS](https://github.com/ondd
 [![Dependency Status](https://gemnasium.com/onddo/chef-handler-zookeeper.png)](https://gemnasium.com/onddo/chef-handler-zookeeper)
 [![Code Climate](https://codeclimate.com/github/onddo/chef-handler-zookeeper.png)](https://codeclimate.com/github/onddo/chef-handler-zookeeper)
 [![Build Status](https://travis-ci.org/onddo/chef-handler-zookeeper.png)](https://travis-ci.org/onddo/chef-handler-zookeeper)
+[![Coverage Status](https://coveralls.io/repos/onddo/chef-handler-zookeeper/badge.png?branch=master)](https://coveralls.io/r/onddo/chef-handler-zookeeper)
 
 ## Requirements
 
