@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Chef-handler-zookeeper by onddo</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Chef-handler-zookeeper</h1>
+        <h2>A simple Chef report handler to send notifications to Zookeeper about Chef runs.</h2>
+        <a href="https://github.com/onddo/chef-handler-zookeeper" class="button"><small>View project on</small>GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>
+<a name="chef-handler-zookeeper" class="anchor" href="#chef-handler-zookeeper"><span class="octicon octicon-link"></span></a>Chef Handler Zookeeper</h1>
+
+<p>A simple Chef report handler to send notifications to Zookeeper about Chef runs.</p>
+
+<p>This Chef Handler is heavily based on <a href="https://github.com/onddo/chef-handler-sns">Chef Handler SNS</a> code.</p>
+
+<ul>
+<li><a href="http://wiki.opscode.com/display/chef/Exception+and+Report+Handlers">http://wiki.opscode.com/display/chef/Exception+and+Report+Handlers</a></li>
+</ul><p><a href="http://badge.fury.io/rb/chef-handler-zookeeper"><img src="https://badge.fury.io/rb/chef-handler-zookeeper.png" alt="Gem Version"></a>
+<a href="https://gemnasium.com/onddo/chef-handler-zookeeper"><img src="https://gemnasium.com/onddo/chef-handler-zookeeper.png" alt="Dependency Status"></a>
+<a href="https://codeclimate.com/github/onddo/chef-handler-zookeeper"><img src="https://codeclimate.com/github/onddo/chef-handler-zookeeper.png" alt="Code Climate"></a>
+<a href="https://travis-ci.org/onddo/chef-handler-zookeeper"><img src="https://travis-ci.org/onddo/chef-handler-zookeeper.png" alt="Build Status"></a>
+<a href="https://coveralls.io/r/onddo/chef-handler-zookeeper"><img src="https://coveralls.io/repos/onddo/chef-handler-zookeeper/badge.png?branch=master" alt="Coverage Status"></a></p>
+
+<h2>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h2>
+
+<ul>
+<li>A Zookeeper server.</li>
+<li>Uses the <code>zk</code> Ruby gem.</li>
+</ul><h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>You can install this handler in two ways:</p>
+
+<h3>
+<a name="method-1-in-the-chef-config-file" class="anchor" href="#method-1-in-the-chef-config-file"><span class="octicon octicon-link"></span></a>Method 1: In the Chef config file</h3>
+
+<p>You can install the RubyGem and configure Chef to use it:</p>
+
+<pre><code>gem install chef-handler-zookeeper
+</code></pre>
+
+<p>Then add to the configuration (<code>/etc/chef/solo.rb</code> for chef-solo or <code>/etc/chef/client.rb</code> for chef-client):</p>
+
+<div class="highlight highlight-ruby"><pre><span class="nb">require</span> <span class="s2">"chef/handler/zookeeper"</span>
+
+<span class="c1"># Create the handler</span>
+<span class="n">zookeeper_handler</span> <span class="o">=</span> <span class="ss">Chef</span><span class="p">:</span><span class="ss">:Handler</span><span class="o">::</span><span class="no">ZookeeperHandler</span><span class="o">.</span><span class="n">new</span>
+
+<span class="c1"># Some Zookeeper configurations</span>
+<span class="n">zookeeper_handler</span><span class="o">.</span><span class="n">server</span> <span class="s2">"zookeeper.mydomain.com"</span>
+<span class="n">zookeeper_handler</span><span class="o">.</span><span class="n">znode</span> <span class="s2">"/chef/</span><span class="si">#{</span><span class="sb">`hostname`</span><span class="o">.</span><span class="n">chomp</span><span class="si">}</span><span class="s2">/chef_status"</span>
+
+<span class="c1"># Add your handler</span>
+<span class="n">start_handlers</span> <span class="o">&lt;&lt;</span> <span class="n">zookeeper_handler</span>
+<span class="n">exception_handlers</span> <span class="o">&lt;&lt;</span> <span class="n">zookeeper_handler</span>
+<span class="n">report_handlers</span> <span class="o">&lt;&lt;</span> <span class="n">zookeeper_handler</span>
+</pre></div>
+
+<h3>
+<a name="method-2-in-a-recipe-with-the-chef_handler-lwrp" class="anchor" href="#method-2-in-a-recipe-with-the-chef_handler-lwrp"><span class="octicon octicon-link"></span></a>Method 2: In a recipe with the chef_handler LWRP</h3>
+
+<p>Use the <a href="http://community.opscode.com/cookbooks/chef_handler">chef_handler LWRP</a>, creating a recipe with the following:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="c1"># A compiler is required for the `zk` gem</span>
+<span class="n">node</span><span class="o">.</span><span class="n">default</span><span class="o">[</span><span class="s1">'build_essential'</span><span class="o">][</span><span class="s1">'compiletime'</span><span class="o">]</span> <span class="o">=</span> <span class="kp">true</span>
+<span class="n">include_recipe</span> <span class="s1">'build-essential'</span>
+
+<span class="c1"># Handler configuration options</span>
+<span class="n">argument_array</span> <span class="o">=</span> <span class="o">[</span>
+  <span class="ss">:server</span> <span class="o">=&gt;</span> <span class="s2">"zookeeper.mydomain.com:2181"</span><span class="p">,</span>
+  <span class="ss">:znode</span> <span class="o">=&gt;</span> <span class="s2">"/chef/somepath/chef_status"</span><span class="p">,</span>
+<span class="o">]</span>
+
+<span class="c1"># Install the `chef-handler-zookeeper` RubyGem during the compile phase</span>
+<span class="n">chef_gem</span> <span class="s2">"chef-handler-zookeeper"</span>
+
+<span class="c1"># Then activate the handler with the `chef_handler` LWRP</span>
+<span class="n">chef_handler</span> <span class="s2">"Chef::Handler::ZookeeperHandler"</span> <span class="k">do</span>
+  <span class="n">source</span> <span class="s2">"</span><span class="si">#{</span><span class="ss">Gem</span><span class="p">:</span><span class="ss">:Specification</span><span class="o">.</span><span class="n">find_by_name</span><span class="p">(</span><span class="s2">"chef-handler-zookeeper"</span><span class="p">)</span><span class="o">.</span><span class="n">lib_dirs_glob</span><span class="si">}</span><span class="s2">/chef/handler/zookeeper"</span>
+  <span class="n">arguments</span> <span class="n">argument_array</span>
+  <span class="n">supports</span> <span class="ss">:report</span> <span class="o">=&gt;</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">:exception</span> <span class="o">=&gt;</span> <span class="kp">true</span>
+  <span class="n">action</span> <span class="ss">:enable</span>
+<span class="k">end</span>
+</pre></div>
+
+<p>If you have an old version of gem package (&lt; 1.8.6) without <code>find_by_name</code> or old chef-client (&lt; 0.10.10) without <code>chef_gem</code>, you can try creating a recipe similar to the following:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="c1"># A compiler is required for the `zk` gem</span>
+<span class="n">node</span><span class="o">.</span><span class="n">default</span><span class="o">[</span><span class="s1">'build_essential'</span><span class="o">][</span><span class="s1">'compiletime'</span><span class="o">]</span> <span class="o">=</span> <span class="kp">true</span>
+<span class="n">include_recipe</span> <span class="s1">'build-essential'</span>
+
+<span class="c1"># Handler configuration options</span>
+<span class="n">argument_array</span> <span class="o">=</span> <span class="o">[</span>
+  <span class="ss">:server</span> <span class="o">=&gt;</span> <span class="s2">"zookeeper.mydomain.com:2181"</span><span class="p">,</span>
+  <span class="ss">:znode</span> <span class="o">=&gt;</span> <span class="s2">"/chef/somepath/chef_status"</span><span class="p">,</span>
+<span class="o">]</span>
+
+<span class="c1"># Install the `chef-handler-zookeeper` RubyGem during the compile phase</span>
+<span class="k">if</span> <span class="n">defined?</span><span class="p">(</span><span class="ss">Chef</span><span class="p">:</span><span class="ss">:Resource</span><span class="o">::</span><span class="no">ChefGem</span><span class="p">)</span>
+  <span class="n">chef_gem</span> <span class="s2">"chef-handler-zookeeper"</span>
+<span class="k">else</span>
+  <span class="n">gem_package</span><span class="p">(</span><span class="s2">"chef-handler-zookeeper"</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">action</span> <span class="ss">:nothing</span>
+  <span class="k">end</span><span class="o">.</span><span class="n">run_action</span><span class="p">(</span><span class="ss">:install</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="c1"># Get the installed `chef-handler-zookeeper` gem path</span>
+<span class="n">zookeeper_handler_path</span> <span class="o">=</span> <span class="ss">Gem</span><span class="p">:</span><span class="ss">:Specification</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="s2">"find_by_name"</span><span class="p">)</span> <span class="p">?</span>
+  <span class="ss">Gem</span><span class="p">:</span><span class="ss">:Specification</span><span class="o">.</span><span class="n">find_by_name</span><span class="p">(</span><span class="s2">"chef-handler-zookeeper"</span><span class="p">)</span><span class="o">.</span><span class="n">lib_dirs_glob</span> <span class="p">:</span>
+  <span class="no">Gem</span><span class="o">.</span><span class="n">all_load_paths</span><span class="o">.</span><span class="n">grep</span><span class="p">(</span><span class="sr">/chef-handler-zookeeper/</span><span class="p">)</span><span class="o">.</span><span class="n">first</span>
+
+<span class="c1"># Then activate the handler with the `chef_handler` LWRP</span>
+<span class="n">chef_handler</span> <span class="s2">"Chef::Handler::ZookeeperHandler"</span> <span class="k">do</span>
+  <span class="n">source</span> <span class="s2">"</span><span class="si">#{</span><span class="n">zookeeper_handler_path</span><span class="si">}</span><span class="s2">/chef/handler/zookeeper"</span>
+  <span class="n">arguments</span> <span class="n">argument_array</span>
+  <span class="n">supports</span> <span class="ss">:report</span> <span class="o">=&gt;</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">:exception</span> <span class="o">=&gt;</span> <span class="kp">true</span>
+  <span class="n">action</span> <span class="ss">:enable</span>
+<span class="k">end</span>
+</pre></div>
+
+<h4>
+<a name="start_handler" class="anchor" href="#start_handler"><span class="octicon octicon-link"></span></a>start_handler</h4>
+
+<p>If you want to run also as a <em>start handler</em> using <code>chef_handler</code> cookbook, you can use a recipe similar to the following:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="c1"># [...]</span>
+
+<span class="c1"># We will need to install the chef handler at compile time</span>
+<span class="n">chef_handler</span> <span class="s2">"Chef::Handler::ZookeeperHandler"</span> <span class="k">do</span>
+<span class="c1"># [...]</span>
+  <span class="n">action</span> <span class="ss">:nothing</span>
+<span class="k">end</span><span class="o">.</span><span class="n">run_action</span><span class="p">(</span><span class="ss">:enable</span><span class="p">)</span>
+
+<span class="c1"># based on code from chef-sensu-handler cookbook: https://github.com/needle-cookbooks/chef-sensu-handler/blob/master/recipes/default.rb</span>
+<span class="n">ruby_block</span> <span class="s1">'trigger_start_handlers'</span> <span class="k">do</span>
+  <span class="n">block</span> <span class="k">do</span>
+    <span class="nb">require</span> <span class="s1">'chef/run_status'</span>
+    <span class="nb">require</span> <span class="s1">'chef/handler'</span>
+
+    <span class="c1"># a bit tricky, required by the default start.json.erb template to have access to node</span>
+    <span class="ss">Chef</span><span class="p">:</span><span class="ss">:Handler</span><span class="o">.</span><span class="n">run_start_handlers</span><span class="p">(</span><span class="nb">self</span><span class="p">)</span>
+  <span class="k">end</span>
+  <span class="n">action</span> <span class="ss">:nothing</span>
+<span class="k">end</span><span class="o">.</span><span class="n">run_action</span><span class="p">(</span><span class="ss">:create</span><span class="p">)</span>
+</pre></div>
+
+<h2>
+<a name="handler-configuration-options" class="anchor" href="#handler-configuration-options"><span class="octicon octicon-link"></span></a>Handler Configuration Options</h2>
+
+<p>The following options are available to configure the handler:</p>
+
+<ul>
+<li>
+<code>server</code> - The Zookeeper server hostname and port (required).</li>
+<li>
+<code>znode</code> - Path of the znode to write to (required). <strong>The znode must already exist</strong>.</li>
+<li>
+<code>start_template</code> - Full path of an erubis template file to use for the znode body on Chef run start (optional).</li>
+<li>
+<code>end_template</code> - Full path of an erubis template file to use for the znode body when Chef run ended (optional).</li>
+</ul><h3>
+<a name="start_template-and-end_template" class="anchor" href="#start_template-and-end_template"><span class="octicon octicon-link"></span></a>start_template and end_template</h3>
+
+<p>This configuration options need to contain the full path of an erubis template. For example:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="c1"># recipe "myapp::zookeeper_handler"</span>
+
+<span class="n">cookbook_file</span> <span class="s2">"chef_handler_zookeeper_body.erb"</span> <span class="k">do</span>
+  <span class="n">path</span> <span class="s2">"/tmp/chef_handler_zookeeper_body.erb"</span>
+  <span class="c1"># [...]</span>
+<span class="k">end</span>
+
+<span class="n">argument_array</span> <span class="o">=</span> <span class="o">[</span>
+  <span class="ss">:server</span> <span class="o">=&gt;</span> <span class="s2">"zookeeper.mydomain.com:2181"</span><span class="p">,</span>
+  <span class="ss">:znode</span> <span class="o">=&gt;</span> <span class="s2">"/chef/somepath/chef_status"</span><span class="p">,</span>
+  <span class="ss">:end_template</span> <span class="o">=&gt;</span> <span class="s2">"/tmp/chef_handler_zookeeper_body.erb"</span><span class="p">,</span>
+<span class="o">]</span>
+<span class="n">chef_handler</span> <span class="s2">"Chef::Handler::ZookeeperHandler"</span> <span class="k">do</span>
+  <span class="c1"># [...]</span>
+  <span class="n">arguments</span> <span class="n">argument_array</span>
+<span class="k">end</span>
+</pre></div>
+
+<div class="highlight highlight-erb"><pre><span class="cp">&lt;%#</span><span class="c"> file "myapp/files/default/chef_handler_zookeeper_body.erb" </span><span class="cp">%&gt;</span><span class="x"></span>
+
+<span class="x">Node Name: </span><span class="cp">&lt;%=</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="cp">&lt;%</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">attribute?</span><span class="p">(</span><span class="s2">"fqdn"</span><span class="p">)</span> <span class="cp">-%&gt;</span><span class="x"></span>
+<span class="x">Hostname: </span><span class="cp">&lt;%=</span> <span class="n">node</span><span class="o">.</span><span class="n">fqdn</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">-%&gt;</span><span class="x"></span>
+
+<span class="x">Chef Run List: </span><span class="cp">&lt;%=</span> <span class="n">node</span><span class="o">.</span><span class="n">run_list</span><span class="o">.</span><span class="n">to_s</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="x">Chef Environment: </span><span class="cp">&lt;%=</span> <span class="n">node</span><span class="o">.</span><span class="n">chef_environment</span> <span class="cp">%&gt;</span><span class="x"></span>
+
+<span class="cp">&lt;%</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">attribute?</span><span class="p">(</span><span class="s2">"ec2"</span><span class="p">)</span> <span class="cp">-%&gt;</span><span class="x"></span>
+<span class="x">Instance Id: </span><span class="cp">&lt;%=</span> <span class="n">node</span><span class="o">.</span><span class="n">ec2</span><span class="o">.</span><span class="n">instance_id</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="x">Instance Public Hostname: </span><span class="cp">&lt;%=</span> <span class="n">node</span><span class="o">.</span><span class="n">ec2</span><span class="o">.</span><span class="n">public_hostname</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="x">Instance Hostname: </span><span class="cp">&lt;%=</span> <span class="n">node</span><span class="o">.</span><span class="n">ec2</span><span class="o">.</span><span class="n">hostname</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="x">Instance Public IPv4: </span><span class="cp">&lt;%=</span> <span class="n">node</span><span class="o">.</span><span class="n">ec2</span><span class="o">.</span><span class="n">public_ipv4</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="x">Instance Local IPv4: </span><span class="cp">&lt;%=</span> <span class="n">node</span><span class="o">.</span><span class="n">ec2</span><span class="o">.</span><span class="n">local_ipv4</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">-%&gt;</span><span class="x"></span>
+
+<span class="x">Chef Client Elapsed Time: </span><span class="cp">&lt;%=</span> <span class="n">elapsed_time</span><span class="o">.</span><span class="n">to_s</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="x">Chef Client Start Time: </span><span class="cp">&lt;%=</span> <span class="n">start_time</span><span class="o">.</span><span class="n">to_s</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="x">Chef Client Start Time: </span><span class="cp">&lt;%=</span> <span class="n">end_time</span><span class="o">.</span><span class="n">to_s</span> <span class="cp">%&gt;</span><span class="x"></span>
+
+<span class="cp">&lt;%</span> <span class="k">if</span> <span class="n">exception</span> <span class="cp">-%&gt;</span><span class="x"></span>
+<span class="x">Exception: </span><span class="cp">&lt;%=</span> <span class="n">run_status</span><span class="o">.</span><span class="n">formatted_exception</span> <span class="cp">%&gt;</span><span class="x"></span>
+<span class="x">Stacktrace:</span>
+<span class="cp">&lt;%=</span> <span class="nb">Array</span><span class="p">(</span><span class="n">backtrace</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span> <span class="cp">%&gt;</span><span class="x"></span>
+
+<span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">-%&gt;</span><span class="x"></span>
+</pre></div>
+
+<p>The following variables are accessible inside the template:</p>
+
+<ul>
+<li>
+<code>start_time</code> - The time the chef run started.</li>
+<li>
+<code>end_time</code> - The time the chef run ended.</li>
+<li>
+<code>elapsed_time</code> - The time elapsed between the start and finish of the chef run.</li>
+<li>
+<code>run_context</code> - The Chef::RunContext object used by the chef run.</li>
+<li>
+<code>exception</code> - The uncaught Exception that terminated the chef run, or nil if the run completed successfully.</li>
+<li>
+<code>backtrace</code> - The backtrace captured by the uncaught exception that terminated the chef run, or nil if the run completed successfully.</li>
+<li>
+<code>node</code> - The Chef::Node for this client run.</li>
+<li>
+<code>all_resources</code> - An Array containing all resources in the chef run's resource_collection.</li>
+<li>
+<code>updated_resources</code> - An Array containing all resources that were updated during the chef run.</li>
+<li>
+<code>success?</code> - Was the chef run successful? True if the chef run did not raise an uncaught exception.</li>
+<li>
+<code>failed?</code> - Did the chef run fail? True if the chef run raised an uncaught exception.</li>
+</ul><p>Default templates are in the <a href="https://github.com/onddo/chef-handler-zookeeper/tree/master/lib/chef/handler/zookeeper/templates">templates</a> directory.</p>
+
+<p><strong>Note:</strong> When using <code>start_template</code> with the <strong>chef_handler cookbook</strong>, only the <code>node</code> variable will be accesible from the template.</p>
+
+<h2>
+<a name="running-the-tests" class="anchor" href="#running-the-tests"><span class="octicon octicon-link"></span></a>Running the tests</h2>
+
+<p>Minitest tests can be run as usual:</p>
+
+<pre><code>rake test
+</code></pre>
+
+<h1>
+<a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO</h1>
+
+<ul>
+<li>Support for znode creation:
+
+<ul>
+<li>Including <em>:create</em> boolean, <em>:acl</em> for the ACL and <em>:recursive</em>.</li>
+</ul>
+</li>
+<li>Add digest authentication support.</li>
+</ul><h2>
+<a name="contributing" class="anchor" href="#contributing"><span class="octicon octicon-link"></span></a>Contributing</h2>
+
+<p><a href="http://github.com/onddo/chef-handler-zookeeper/pulls">Pull Requests</a> are welcome.</p>
+
+<h2>
+<a name="license-and-author" class="anchor" href="#license-and-author"><span class="octicon octicon-link"></span></a>License and Author</h2>
+
+<table>
+<thead><tr>
+<th align="left"></th>
+<th align="left"></th>
+</tr></thead>
+<tbody>
+<tr>
+<td align="left"><strong>Author:</strong></td>
+<td align="left">Xabier de Zuazo (<a href="mailto:xabier@onddo.com">xabier@onddo.com</a>)</td>
+</tr>
+<tr>
+<td align="left"><strong>Copyright:</strong></td>
+<td align="left">Copyright (c) 2013 Onddo Labs, SL. (<a href="http://www.onddo.com">www.onddo.com</a>)</td>
+</tr>
+<tr>
+<td align="left"><strong>License:</strong></td>
+<td align="left">Apache License, Version 2.0</td>
+</tr>
+</tbody>
+</table><p>Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at</p>
+
+<pre><code>http://www.apache.org/licenses/LICENSE-2.0
+</code></pre>
+
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.</p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/onddo/chef-handler-zookeeper/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/onddo/chef-handler-zookeeper/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/onddo/chef-handler-zookeeper"></a> is maintained by <a href="https://github.com/onddo">onddo</a>.</p>
+
+          <p>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
