@@ -220,7 +220,6 @@ Minitest tests can be run as usual:
 * Support for znode creation:
   * Including *:create* boolean, *:acl* for the ACL and *:recursive*.
 * Add digest authentication support.
-* Add tests.
 
 ## Contributing
 
