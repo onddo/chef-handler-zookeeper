@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.description = 'Chef report handler to send notifications to Zookeeper about Chef runs.'
   s.authors = ['Onddo Labs, SL.']
   s.email = 'team@onddo.com'
-  s.homepage = 'http://github.com/onddo/chef-handler-zookeeper'
+  s.homepage = 'http://onddo.github.io/chef-handler-zookeeper'
   s.require_path = 'lib'
   s.files = %w(LICENSE README.md) + Dir.glob('lib/**/*')
   s.test_files = Dir.glob('{test,spec,features}/*')
