@@ -9,6 +9,7 @@ Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
   s.summary = 'Send Chef reports to Zookeeper'
   s.description = 'Chef report handler to send notifications to Zookeeper about Chef runs.'
+  s.license = 'Apache-2.0'
   s.authors = ['Onddo Labs, SL.']
   s.email = 'team@onddo.com'
   s.homepage = 'http://onddo.github.io/chef-handler-zookeeper'
